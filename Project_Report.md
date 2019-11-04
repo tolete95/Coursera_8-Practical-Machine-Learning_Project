@@ -1,20 +1,21 @@
-#Introduction
+# Introduction
+
 In this project, the goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here:
 http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
 
 
-#Preparing the data
+# Preparing the data
 First we will need to load the required libraries
 ```{r, cache = T}
 library(caret)
 library(randomForest)
 ```
-##Loading
+## Loading
 ```{r, cache = T}
 Otraining <- read.csv("~./pml-training.csv",sep = ",")
 Otesting <- read.csv("~./pml-testing.csv",sep = ",")
 ```
-##Cleaning
+## Cleaning
 First we remove the first 6 columns (rownumber, user, and time stamp). We want to predict accordign to the sensor information only. 
 ```{r, cache = T}
 Otraining <- Otraining[,6:length(Otraining)]
@@ -29,7 +30,7 @@ Finally we remove the selected columns for training and testing datasets
 Otraining<-Otraining[,-rmindx]
 Otesting<-Otesting[,-rmindx]
 ```
-##Slicing
+## Slicing
 Now we will proceed with the data slicing for cross validation
 ```{r, cache = T}
 inTrain <- createDataPartition(y=Otraining$classe, p=0.70, list=FALSE)
@@ -37,10 +38,10 @@ training <- Otraining[inTrain,]
 testing <- Otraining[-inTrain,]
 ```
 
-#Data Modelling
-First for reproductibility reasons, we will set.seed.
-Then we fit model using RandomForest and Gradient Boosting Machine. Use train control to set crossvlidation  to 3 partitions.
-Usually 10 folds are used but even 5 folds gave a high computation time and still with 3 partitions we geat a very high accuracy.
+## Data Modelling
+First for reproductibility reasons, we will set seed.
+Then we fit two different models  RandomForest and Gradient Boosting Machine. Use train control to set crossvlidation  to 3 partitions.
+Usually 10 folds are used but even 5 folds gave a high computation time so I have stayed with 3 partitions.
 VerboseIter is set to TRUE to follow the  model fitting
 ```{r, cache = T}
 set.seed(41119)
@@ -49,7 +50,8 @@ modRf <- train(classe~.,data=training,method = "rf",
 modGbm <- train(classe~.,data=training,method = "gbm",
                trControl=trainControl(method = "cv",number=3,verboseIter = T))
 ```               
-Now we predict the results using thefittet models in the subseted testing. We show confusion matrix
+Now we predict the results using the fittet models in the subseted testing data set. 
+We can see the confusion  matrix with the results of the prediction. 
 ```{r, cache = T}
 predRf <- predict(modRf,testing)
 confusionMatrix(testing$classe, predRf)
